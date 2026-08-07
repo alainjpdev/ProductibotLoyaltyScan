@@ -1,0 +1,39 @@
+name: ProductibotLoyaltyScan
+options:
+  bundleIdPrefix: com.wavesmanagement
+targets:
+  ProductibotLoyaltyScan:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: Sources
+    dependencies:
+      - package: supabase-swift
+        product: Supabase
+      - package: CodeScanner
+        product: CodeScanner
+    info:
+      path: Info.plist
+      properties:
+        UILaunchStoryboardName: LaunchScreen
+        UIRequiresFullScreen: true
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        NSCameraUsageDescription: "Necesitamos acceso a la cámara para escanear el código QR de los clientes."
+    settings:
+      base:
+        INFOPLIST_FILE: Info.plist
+        GENERATE_INFOPLIST_FILE: false
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: "DSVRALKN65"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        MARKETING_VERSION: 1.0.0
+        CURRENT_PROJECT_VERSION: 1
+packages:
+  supabase-swift:
+    url: https://github.com/supabase-community/supabase-swift.git
+    from: 2.22.0
+  CodeScanner:
+    url: https://github.com/twostraws/CodeScanner.git
+    from: 2.3.3
