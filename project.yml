@@ -20,6 +20,7 @@ targets:
         UIRequiresFullScreen: true
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
+        CFBundleDisplayName: "Productibot QR SCAN"
         NSCameraUsageDescription: "Necesitamos acceso a la cámara para escanear el código QR de los clientes."
     settings:
       base:
