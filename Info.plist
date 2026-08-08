@@ -19,7 +19,9 @@
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>2</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>© 2026 Alain Jean Paul Raimond Kedilhac Ruiz</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Necesitamos acceso a la cámara para escanear el código QR de los clientes.</string>
 	<key>UILaunchStoryboardName</key>
