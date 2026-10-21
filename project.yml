@@ -6,6 +6,7 @@ targets:
     type: application
     platform: iOS
     deploymentTarget: "16.0"
+    scheme: {}
     sources:
       - path: Sources
     dependencies:
@@ -21,7 +22,10 @@ targets:
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
         CFBundleDisplayName: "Productibot QR SCAN"
+        CFBundleShortVersionString: "2.0.0"
+        CFBundleVersion: "3"
         NSCameraUsageDescription: "Necesitamos acceso a la cámara para escanear el código QR de los clientes."
+        NSHumanReadableCopyright: "© 2026 Alain Jean Paul Raimond Kedilhac Ruiz"
     settings:
       base:
         INFOPLIST_FILE: Info.plist
@@ -29,8 +33,8 @@ targets:
         CODE_SIGN_STYLE: Automatic
         DEVELOPMENT_TEAM: "DSVRALKN65"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-        MARKETING_VERSION: 1.0.0
-        CURRENT_PROJECT_VERSION: 1
+        MARKETING_VERSION: 2.0.0
+        CURRENT_PROJECT_VERSION: 3
 packages:
   supabase-swift:
     url: https://github.com/supabase-community/supabase-swift.git

@@ -17,7 +17,6 @@
 		D0E8F1D665ABE8DAA5D960AD /* SupabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 720E7EBB3B00D87A88BDA3B8 /* SupabaseManager.swift */; };
 		DC9FCC3DDDF38E0E02A53334 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 343E532C4FFEE093A6AFA58B /* DashboardView.swift */; };
 		EF63F99CEE3BB00DB9DAF440 /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C28A84E6FC7EADCD1474DC1 /* Configuration.swift */; };
-		F6FFD045CDDCCA2894FC1980 /* GenerateQRView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AB04ADEDF87F08598C6F00B /* GenerateQRView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,7 +28,6 @@
 		720E7EBB3B00D87A88BDA3B8 /* SupabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseManager.swift; sourceTree = "<group>"; };
 		7C28A84E6FC7EADCD1474DC1 /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
 		8D74542794D2FE7C9A40A8F6 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
-		9AB04ADEDF87F08598C6F00B /* GenerateQRView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerateQRView.swift; sourceTree = "<group>"; };
 		A210CC68ECD02A173A83593C /* ProductibotLoyaltyScan.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ProductibotLoyaltyScan.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -86,7 +84,6 @@
 			isa = PBXGroup;
 			children = (
 				343E532C4FFEE093A6AFA58B /* DashboardView.swift */,
-				9AB04ADEDF87F08598C6F00B /* GenerateQRView.swift */,
 				0CCBA5A4AAC411EF1921A829 /* LaunchScreen.storyboard */,
 				43E82E14DB62B7FE7A905869 /* LoginView.swift */,
 				32ACE2A46B95FD9E60D8ED4A /* ScanQRView.swift */,
@@ -184,7 +181,6 @@
 				4FE6E53A85436535EFBFD68E /* App.swift in Sources */,
 				EF63F99CEE3BB00DB9DAF440 /* Configuration.swift in Sources */,
 				DC9FCC3DDDF38E0E02A53334 /* DashboardView.swift in Sources */,
-				F6FFD045CDDCCA2894FC1980 /* GenerateQRView.swift in Sources */,
 				4A072B9D5723F3741D67FC8C /* LoginView.swift in Sources */,
 				C68100A77B31947D47A57038 /* ScanQRView.swift in Sources */,
 				D0E8F1D665ABE8DAA5D960AD /* SupabaseManager.swift in Sources */,
@@ -262,7 +258,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = DSVRALKN65;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
@@ -271,7 +267,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 2.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.wavesmanagement.ProductibotLoyaltyScan;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -284,7 +280,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = DSVRALKN65;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
@@ -293,7 +289,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 2.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.wavesmanagement.ProductibotLoyaltyScan;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";

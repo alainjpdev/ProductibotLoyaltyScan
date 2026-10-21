@@ -1,9 +1,20 @@
-import json
 import os
-import subprocess
+import json
+from PIL import Image, ImageOps
 
-icon_source = "/Users/wavesmanagement/scripts/Productibot Loyalty Scan/logo 2.png"
+src_path = "/Users/wavesmanagement/scripts/Productibot Loyalty Scan/productibot_qr.png"
 appiconset_dir = "/Users/wavesmanagement/scripts/Productibot Loyalty Scan/Sources/Assets.xcassets/AppIcon.appiconset"
+
+img = Image.open(src_path).convert("RGB")
+inv = ImageOps.invert(img)
+bbox = inv.getbbox()
+qr_crop = img.crop(bbox)
+
+# Canvas 1024x1024
+canvas = Image.new("RGB", (1024, 1024), (255, 255, 255))
+qr_scaled = qr_crop.resize((700, 700), Image.NEAREST)
+offset = ((1024 - 700) // 2, (1024 - 700) // 2)
+canvas.paste(qr_scaled, offset)
 
 sizes = [
     (20, 1, "ipad"), (20, 2, "ipad"), (20, 2, "iphone"), (20, 3, "iphone"),
@@ -15,20 +26,16 @@ sizes = [
     (1024, 1, "ios-marketing")
 ]
 
-images = []
-
+images_meta = []
 for size, scale, idiom in sizes:
-    pixel_size = int(size * scale)
+    px = int(size * scale)
     filename = f"Icon-{size}x{size}@{scale}x-{idiom}.png"
-    filepath = os.path.join(appiconset_dir, filename)
-    subprocess.run(["sips", "-z", str(pixel_size), str(pixel_size), icon_source, "--out", filepath], stdout=subprocess.DEVNULL)
+    out_path = os.path.join(appiconset_dir, filename)
+    resized = canvas.resize((px, px), Image.LANCZOS)
+    resized.save(out_path, "PNG")
     
-    if size == int(size):
-        size_str = f"{int(size)}x{int(size)}"
-    else:
-        size_str = f"{size}x{size}"
-        
-    images.append({
+    size_str = f"{int(size)}x{int(size)}" if size == int(size) else f"{size}x{size}"
+    images_meta.append({
         "size": size_str,
         "idiom": idiom,
         "filename": filename,
@@ -36,7 +43,7 @@ for size, scale, idiom in sizes:
     })
 
 contents = {
-    "images": images,
+    "images": images_meta,
     "info": {
         "version": 1,
         "author": "xcode"
@@ -46,4 +53,4 @@ contents = {
 with open(os.path.join(appiconset_dir, "Contents.json"), "w") as f:
     json.dump(contents, f, indent=2)
 
-print("Icons generated successfully.")
+print("Icons generated successfully from productibot_qr.png.")

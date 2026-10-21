@@ -9,119 +9,194 @@ struct LoginView: View {
     
     var body: some View {
         ZStack {
-            // Background
-            LinearGradient(gradient: Gradient(colors: [Color.blue.opacity(0.1), Color.purple.opacity(0.1)]), startPoint: .top, endPoint: .bottom)
-                .ignoresSafeArea()
+            // Fondo oscuro estilizado
+            LinearGradient(
+                colors: [
+                    Color(red: 0.07, green: 0.09, blue: 0.14),
+                    Color(red: 0.04, green: 0.05, blue: 0.08)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
             
-            VStack(spacing: 25) {
-                Spacer()
-                
-                // Header
-                VStack(spacing: 12) {
-                    Text("Productibot QR SCAN")
-                        .font(.system(size: 28, weight: .bold, design: .rounded))
-                        .foregroundColor(.primary)
+            // Halo de luz ambiente
+            Circle()
+                .fill(Color.blue.opacity(0.12))
+                .frame(width: 300, height: 300)
+                .blur(radius: 70)
+                .offset(y: -120)
+            
+            ScrollView {
+                VStack(spacing: 28) {
+                    Spacer()
+                        .frame(height: 40)
                     
-                    Text("Staff Login")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .foregroundColor(.secondary)
-                }
-                .padding(.bottom, 20)
-                
-                // Error Message
-                if let error = errorMessage {
-                    Text(error)
-                        .foregroundColor(.red)
-                        .font(.footnote)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                        .transition(.opacity)
-                }
-                
-                // Input Fields
-                VStack(spacing: 16) {
-                    // Email Field
-                    HStack {
-                        Image(systemName: "envelope.fill")
-                            .foregroundColor(.gray)
-                        TextField("Email", text: $email)
-                            .autocapitalization(.none)
-                            .keyboardType(.emailAddress)
-                    }
-                    .padding()
-                    .background(Color(UIColor.systemBackground))
-                    .cornerRadius(12)
-                    .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
-                    
-                    // Password Field
-                    HStack {
-                        Image(systemName: "lock.fill")
-                            .foregroundColor(.gray)
+                    // Logo e Identidad
+                    VStack(spacing: 16) {
+                        ZStack {
+                            Circle()
+                                .fill(
+                                    LinearGradient(
+                                        colors: [Color.blue.opacity(0.3), Color.cyan.opacity(0.1)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .frame(width: 88, height: 88)
+                                .overlay(
+                                    Circle()
+                                        .stroke(Color.blue.opacity(0.4), lineWidth: 1.5)
+                                )
+                            
+                            Image(systemName: "qrcode.viewfinder")
+                                .font(.system(size: 42, weight: .light))
+                                .foregroundColor(.cyan)
+                        }
+                        .shadow(color: Color.blue.opacity(0.3), radius: 15, x: 0, y: 5)
                         
-                        Group {
-                            if showPassword {
-                                TextField("Password", text: $password)
+                        VStack(spacing: 6) {
+                            Text("Productibot QR SCAN")
+                                .font(.system(size: 26, weight: .bold, design: .rounded))
+                                .foregroundColor(.white)
+                            
+                            Text("Terminal de Escaneo para Personal")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.white.opacity(0.6))
+                        }
+                    }
+                    .padding(.bottom, 10)
+                    
+                    // Mensaje de Error
+                    if let error = errorMessage {
+                        HStack(spacing: 10) {
+                            Image(systemName: "exclamationmark.circle.fill")
+                                .foregroundColor(.red)
+                            Text(error)
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(.red)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color.red.opacity(0.12))
+                        .cornerRadius(12)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.red.opacity(0.3), lineWidth: 1)
+                        )
+                        .padding(.horizontal, 24)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                    }
+                    
+                    // Campos de Entrada
+                    VStack(spacing: 16) {
+                        // Email Field
+                        HStack(spacing: 12) {
+                            Image(systemName: "envelope.fill")
+                                .font(.system(size: 16))
+                                .foregroundColor(.white.opacity(0.4))
+                                .frame(width: 20)
+                            
+                            TextField("", text: $email, prompt: Text("Correo electrónico").foregroundColor(.white.opacity(0.35)))
+                                .foregroundColor(.white)
+                                .textInputAutocapitalization(.never)
+                                .autocorrectionDisabled(true)
+                                .keyboardType(.emailAddress)
+                        }
+                        .padding(16)
+                        .background(Color(red: 0.11, green: 0.13, blue: 0.18))
+                        .cornerRadius(14)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14)
+                                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                        )
+                        
+                        // Password Field
+                        HStack(spacing: 12) {
+                            Image(systemName: "lock.fill")
+                                .font(.system(size: 16))
+                                .foregroundColor(.white.opacity(0.4))
+                                .frame(width: 20)
+                            
+                            Group {
+                                if showPassword {
+                                    TextField("", text: $password, prompt: Text("Contraseña").foregroundColor(.white.opacity(0.35)))
+                                } else {
+                                    SecureField("", text: $password, prompt: Text("Contraseña").foregroundColor(.white.opacity(0.35)))
+                                }
+                            }
+                            .foregroundColor(.white)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled(true)
+                            
+                            Button(action: {
+                                withAnimation {
+                                    showPassword.toggle()
+                                }
+                            }) {
+                                Image(systemName: showPassword ? "eye.slash.fill" : "eye.fill")
+                                    .font(.system(size: 15))
+                                    .foregroundColor(.white.opacity(0.4))
+                            }
+                        }
+                        .padding(16)
+                        .background(Color(red: 0.11, green: 0.13, blue: 0.18))
+                        .cornerRadius(14)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14)
+                                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                        )
+                    }
+                    .padding(.horizontal, 24)
+                    
+                    // Botón de Iniciar Sesión
+                    Button(action: login) {
+                        ZStack {
+                            if isLoading {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
                             } else {
-                                SecureField("Password", text: $password)
+                                Text("Iniciar Sesión")
+                                    .font(.system(size: 16, weight: .bold))
                             }
                         }
-                        .autocapitalization(.none)
-                        
-                        Button(action: {
-                            withAnimation {
-                                showPassword.toggle()
-                            }
-                        }) {
-                            Image(systemName: showPassword ? "eye.slash.fill" : "eye.fill")
-                                .foregroundColor(.gray)
-                        }
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(
+                            LinearGradient(
+                                colors: [
+                                    Color(red: 0.15, green: 0.45, blue: 0.95),
+                                    Color(red: 0.08, green: 0.28, blue: 0.75)
+                                ],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .cornerRadius(14)
+                        .shadow(color: Color.blue.opacity(0.35), radius: 12, x: 0, y: 6)
                     }
-                    .padding()
-                    .background(Color(UIColor.systemBackground))
-                    .cornerRadius(12)
-                    .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+                    .disabled(isLoading || email.trimmingCharacters(in: .whitespaces).isEmpty || password.isEmpty)
+                    .opacity(isLoading || email.trimmingCharacters(in: .whitespaces).isEmpty || password.isEmpty ? 0.5 : 1.0)
+                    .padding(.horizontal, 24)
+                    .padding(.top, 8)
+                    
+                    Spacer()
                 }
-                .padding(.horizontal)
-                
-                // Login Button
-                Button(action: login) {
-                    ZStack {
-                        if isLoading {
-                            ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                        } else {
-                            Text("Login")
-                                .font(.headline)
-                                .fontWeight(.bold)
-                        }
-                    }
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(
-                        LinearGradient(gradient: Gradient(colors: [Color.blue, Color.purple]), startPoint: .leading, endPoint: .trailing)
-                    )
-                    .cornerRadius(12)
-                    .shadow(color: Color.blue.opacity(0.3), radius: 10, x: 0, y: 5)
-                }
-                .disabled(isLoading || email.isEmpty || password.isEmpty)
-                .opacity(isLoading || email.isEmpty || password.isEmpty ? 0.6 : 1.0)
-                .padding(.horizontal)
-                .padding(.top, 10)
-                
-                Spacer()
-                Spacer()
             }
         }
+        .preferredColorScheme(.dark)
     }
     
     private func login() {
         isLoading = true
         errorMessage = nil
+        let cleanEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
+        
         Task {
             do {
-                try await SupabaseManager.shared.client.auth.signIn(email: email, password: password)
+                try await SupabaseManager.shared.client.auth.signIn(email: cleanEmail, password: password)
                 await MainActor.run {
                     SupabaseManager.shared.isAuthenticated = true
                 }
