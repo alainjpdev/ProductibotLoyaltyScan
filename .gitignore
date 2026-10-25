@@ -4,3 +4,13 @@ DerivedData/
 .swiftpm/
 build/
 *.pyc
+
+# Android
+.gradle/
+**/build/
+android/.gradle/
+android/.kotlin/
+android/local.properties
+android/.idea/
+*.apk
+*.aab

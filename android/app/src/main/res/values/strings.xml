@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Productibot QR SCAN</string>
+    <string name="camera_permission_required">Se requiere acceso a la cámara para escanear los códigos QR de los clientes y cupones.</string>
+    <string name="grant_permission">Permitir Cámara</string>
+</resources>
