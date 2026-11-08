@@ -15,6 +15,11 @@ struct ProductibotLoyaltyScanApp: App {
             }
             .animation(.default, value: supabase.isAuthenticated)
             .preferredColorScheme(.dark)
+            .onOpenURL { url in
+                Task {
+                    await supabase.handleOpenURL(url)
+                }
+            }
         }
     }
 }

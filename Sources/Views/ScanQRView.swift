@@ -32,21 +32,21 @@ struct ScanQRView: View {
             }
             .ignoresSafeArea()
             
-            // 2. Máscara y Retícula de Enfoque con Láser
+            // 2. Máscara y Retícula Uber Minimalist
             viewfinderOverlay
             
-            // 3. Barra Superior (Cancelar y Linterna)
+            // 3. Barra Superior (Cerrar y Linterna Uber Style)
             VStack {
                 topControlBar
                 Spacer()
             }
             
-            // 4. Overlay de Carga durante la verificación con Supabase
+            // 4. Overlay de Procesamiento
             if isProcessing {
                 processingOverlay
             }
             
-            // 5. Tarjeta de Resultado (Éxito o Error)
+            // 5. Tarjeta Modal de Resultado Uber Style
             if let result = scanResult {
                 resultModalOverlay(result: result)
             }
@@ -57,7 +57,7 @@ struct ScanQRView: View {
         }
     }
     
-    // MARK: - Barra Superior
+    // MARK: - Barra Superior Uber Style
     private var topControlBar: some View {
         HStack {
             Button(action: {
@@ -65,16 +65,19 @@ struct ScanQRView: View {
             }) {
                 HStack(spacing: 6) {
                     Image(systemName: "xmark")
-                        .font(.system(size: 16, weight: .bold))
+                        .font(.system(size: 14, weight: .bold))
                     Text("Cerrar")
-                        .font(.system(size: 15, weight: .semibold))
+                        .font(.system(size: 14, weight: .semibold))
                 }
                 .foregroundColor(.white)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 10)
-                .background(.ultraThinMaterial)
+                .background(Color.black.opacity(0.75))
                 .clipShape(Capsule())
-                .shadow(color: Color.black.opacity(0.3), radius: 5, x: 0, y: 2)
+                .overlay(
+                    Capsule()
+                        .stroke(Color(white: 0.3), lineWidth: 1)
+                )
             }
             
             Spacer()
@@ -85,57 +88,71 @@ struct ScanQRView: View {
                 }
             }) {
                 Image(systemName: isTorchOn ? "bolt.fill" : "bolt.slash.fill")
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(isTorchOn ? .yellow : .white)
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(isTorchOn ? Color(red: 1.0, green: 0.8, blue: 0.2) : .white)
                     .frame(width: 44, height: 44)
-                    .background(.ultraThinMaterial)
+                    .background(Color.black.opacity(0.75))
                     .clipShape(Circle())
-                    .shadow(color: Color.black.opacity(0.3), radius: 5, x: 0, y: 2)
+                    .overlay(
+                        Circle()
+                            .stroke(Color(white: 0.3), lineWidth: 1)
+                    )
             }
         }
         .padding(.horizontal, 20)
         .padding(.top, 14)
     }
     
-    // MARK: - Retícula del Viewfinder y Láser
+    // MARK: - Retícula del Viewfinder Uber Minimalist
     private var viewfinderOverlay: some View {
         VStack(spacing: 24) {
             Spacer()
             
             ZStack {
-                // Marco transparente central
-                RoundedRectangle(cornerRadius: 24)
-                    .stroke(Color.white.opacity(0.15), lineWidth: 1)
-                    .frame(width: 260, height: 260)
+                // Marco central
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                    .frame(width: 250, height: 250)
                 
-                // Esquinas destacadas
+                // Esquinas Uber (blanco sólido nítido)
                 ViewfinderCorners()
-                    .stroke(Color(red: 0.2, green: 0.6, blue: 1.0), lineWidth: 4)
-                    .frame(width: 260, height: 260)
+                    .stroke(Color.white, lineWidth: 3.5)
+                    .frame(width: 250, height: 250)
                 
-                // Línea láser animada
+                // Línea láser Uber Green
                 Rectangle()
                     .fill(
                         LinearGradient(
-                            colors: [Color.clear, Color.cyan.opacity(0.8), Color.clear],
+                            colors: [
+                                Color.clear,
+                                Color(red: 0.02, green: 0.76, blue: 0.40).opacity(0.9), // Uber Green
+                                Color.clear
+                            ],
                             startPoint: .leading,
                             endPoint: .trailing
                         )
                     )
-                    .frame(width: 240, height: 3)
-                    .shadow(color: .cyan, radius: 8, x: 0, y: 0)
+                    .frame(width: 230, height: 2.5)
                     .offset(y: laserOffset)
             }
             
-            // Indicador de instrucción
-            Text("Apunta al código QR del cliente o cupón")
-                .font(.system(size: 14, weight: .medium))
-                .foregroundColor(.white.opacity(0.9))
-                .padding(.horizontal, 18)
-                .padding(.vertical, 10)
-                .background(.ultraThinMaterial)
-                .clipShape(Capsule())
-                .shadow(color: Color.black.opacity(0.4), radius: 8)
+            // Indicador de instrucción Uber Pill
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(Color(red: 0.02, green: 0.76, blue: 0.40))
+                    .frame(width: 6, height: 6)
+                Text("Enfoca el código QR de la tarjeta o cupón")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(.white)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(Color.black.opacity(0.8))
+            .clipShape(Capsule())
+            .overlay(
+                Capsule()
+                    .stroke(Color(white: 0.25), lineWidth: 1)
+            )
             
             Spacer()
             Spacer()
@@ -145,126 +162,116 @@ struct ScanQRView: View {
     // MARK: - Overlay de Procesamiento
     private var processingOverlay: some View {
         ZStack {
-            Color.black.opacity(0.65)
+            Color.black.opacity(0.75)
                 .ignoresSafeArea()
             
             VStack(spacing: 16) {
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                    .scaleEffect(1.4)
+                    .scaleEffect(1.3)
                 
-                Text("Validando en el sistema...")
-                    .font(.system(size: 16, weight: .semibold))
+                Text("Verificando en el sistema...")
+                    .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(.white)
             }
-            .padding(28)
-            .background(.ultraThinMaterial)
-            .cornerRadius(20)
-            .shadow(radius: 20)
+            .padding(26)
+            .background(Color(white: 0.12))
+            .cornerRadius(16)
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(Color(white: 0.25), lineWidth: 1)
+            )
         }
     }
     
-    // MARK: - Tarjeta Modal de Resultado
+    // MARK: - Tarjeta Modal de Resultado Uber Style
     private func resultModalOverlay(result: ScanProcessResult) -> some View {
         ZStack {
-            Color.black.opacity(0.7)
+            Color.black.opacity(0.8)
                 .ignoresSafeArea()
-                .onTapGesture {
-                    // Tap afuera no cierra si está procesando
-                }
             
             VStack(spacing: 20) {
                 // Ícono de estado
                 ZStack {
                     Circle()
-                        .fill(resultColor(result.type).opacity(0.2))
-                        .frame(width: 80, height: 80)
+                        .fill(resultColor(result.type).opacity(0.18))
+                        .frame(width: 72, height: 72)
                     
                     Image(systemName: resultIcon(result.type))
-                        .font(.system(size: 40, weight: .bold))
+                        .font(.system(size: 34, weight: .bold))
                         .foregroundColor(resultColor(result.type))
                 }
-                .padding(.top, 8)
+                .padding(.top, 6)
                 
                 // Títulos
-                VStack(spacing: 8) {
+                VStack(spacing: 6) {
                     Text(result.title)
                         .font(.system(size: 22, weight: .bold))
                         .foregroundColor(.white)
                         .multilineTextAlignment(.center)
                     
                     if let client = result.clientName {
-                        HStack(spacing: 6) {
-                            Image(systemName: "person.circle.fill")
-                                .foregroundColor(.cyan)
-                            Text(client)
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(.white.opacity(0.95))
-                        }
+                        Text(client)
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(Color(white: 0.85))
                     }
                     
                     Text(result.subtitle)
-                        .font(.system(size: 15))
-                        .foregroundColor(.white.opacity(0.8))
+                        .font(.system(size: 14, weight: .regular))
+                        .foregroundColor(Color(white: 0.6))
                         .multilineTextAlignment(.center)
-                        .padding(.horizontal, 10)
+                        .padding(.horizontal, 8)
                 }
                 
                 if let detail = result.detail {
                     Text(detail)
-                        .font(.system(size: 13))
-                        .foregroundColor(.white.opacity(0.6))
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(Color(white: 0.45))
                         .multilineTextAlignment(.center)
                 }
                 
                 Divider()
-                    .background(Color.white.opacity(0.2))
+                    .background(Color(white: 0.18))
                     .padding(.vertical, 4)
                 
-                // Botones de Acción
-                VStack(spacing: 12) {
+                // Botones Uber Style
+                VStack(spacing: 10) {
+                    // Botón Principal Blanco Uber
                     Button(action: resetScannerForNext) {
-                        HStack {
+                        HStack(spacing: 8) {
                             Image(systemName: "qrcode.viewfinder")
+                                .font(.system(size: 15, weight: .bold))
                             Text("Escanear Otro")
-                                .bold()
+                                .font(.system(size: 15, weight: .bold))
                         }
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(
-                            LinearGradient(
-                                colors: [Color.blue, Color(red: 0.1, green: 0.4, blue: 0.9)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .foregroundColor(.white)
-                        .cornerRadius(14)
-                        .shadow(color: Color.blue.opacity(0.4), radius: 8, x: 0, y: 4)
+                        .frame(height: 50)
+                        .background(Color.white)
+                        .foregroundColor(.black)
+                        .cornerRadius(12)
                     }
                     
+                    // Botón Secundario Cerrar
                     Button(action: {
                         presentationMode.wrappedValue.dismiss()
                     }) {
                         Text("Terminar")
-                            .font(.system(size: 15, weight: .medium))
-                            .foregroundColor(.white.opacity(0.75))
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(Color(white: 0.7))
                             .frame(maxWidth: .infinity)
-                            .padding(.vertical, 8)
+                            .padding(.vertical, 10)
                     }
                 }
             }
             .padding(24)
             .frame(maxWidth: 340)
-            .background(
-                RoundedRectangle(cornerRadius: 24)
-                    .fill(Color(red: 0.1, green: 0.12, blue: 0.16))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 24)
-                            .stroke(resultColor(result.type).opacity(0.4), lineWidth: 1.5)
-                    )
+            .background(Color(white: 0.10))
+            .cornerRadius(20)
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(Color(white: 0.22), lineWidth: 1)
             )
-            .shadow(color: Color.black.opacity(0.6), radius: 30)
+            .shadow(color: Color.black.opacity(0.8), radius: 30)
             .transition(.scale.combined(with: .opacity))
         }
     }
@@ -274,7 +281,6 @@ struct ScanQRView: View {
         guard !isProcessing && scanResult == nil else { return }
         isProcessing = true
         
-        // Sonido de Beep y Haptic inmediato
         AudioServicesPlaySystemSound(1057)
         let impact = UIImpactFeedbackGenerator(style: .medium)
         impact.impactOccurred()
@@ -288,7 +294,6 @@ struct ScanQRView: View {
                     self.scanResult = result
                 }
                 
-                // Haptic de Confirmación
                 let notification = UINotificationFeedbackGenerator()
                 if result.type == .error {
                     notification.notificationOccurred(.error)
@@ -331,11 +336,11 @@ struct ScanQRView: View {
     private func resultColor(_ type: ScanResultType) -> Color {
         switch type {
         case .visit:
-            return Color.green
+            return Color(red: 0.02, green: 0.76, blue: 0.40) // Uber Green
         case .reward:
-            return Color.yellow
+            return Color(red: 1.0, green: 0.75, blue: 0.26) // Gold
         case .error:
-            return Color.red
+            return Color(red: 0.95, green: 0.25, blue: 0.25) // Red
         }
     }
     
@@ -355,8 +360,8 @@ struct ScanQRView: View {
 struct ViewfinderCorners: Shape {
     func path(in rect: CGRect) -> Path {
         var path = Path()
-        let length: CGFloat = 32
-        let radius: CGFloat = 16
+        let length: CGFloat = 30
+        let radius: CGFloat = 14
         
         // Top-Left
         path.move(to: CGPoint(x: rect.minX, y: rect.minY + length))
@@ -368,7 +373,7 @@ struct ViewfinderCorners: Shape {
         path.move(to: CGPoint(x: rect.maxX - length, y: rect.minY))
         path.addLine(to: CGPoint(x: rect.maxX - radius, y: rect.minY))
         path.addQuadCurve(to: CGPoint(x: rect.maxX, y: rect.minY + radius), control: CGPoint(x: rect.maxX, y: rect.minY))
-        path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY + length))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY + length))
         
         // Bottom-Right
         path.move(to: CGPoint(x: rect.maxX, y: rect.maxY - length))

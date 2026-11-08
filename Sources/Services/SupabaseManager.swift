@@ -34,6 +34,7 @@ class SupabaseManager: ObservableObject {
     
     let client: SupabaseClient
     @Published var isAuthenticated = false
+    @Published var authErrorMessage: String?
     @Published var storeId: String?
     @Published var storeLogoUrl: String?
     @Published var storeName: String?
@@ -55,9 +56,15 @@ class SupabaseManager: ObservableObject {
         Task {
             for await state in client.auth.authStateChanges {
                 let hasSession = state.session != nil
-                await MainActor.run {
-                    self.isAuthenticated = hasSession
-                    if !hasSession {
+                if hasSession {
+                    do {
+                        try await verifyAdminAndFetchStoreDetails()
+                    } catch {
+                        print("Error verificando admin en authStateChange: \(error)")
+                    }
+                } else {
+                    await MainActor.run {
+                        self.isAuthenticated = false
                         self.storeId = nil
                         self.storeLogoUrl = nil
                         self.storeName = nil
@@ -67,61 +74,116 @@ class SupabaseManager: ObservableObject {
                         self.lastScanResult = nil
                     }
                 }
-                
-                if hasSession {
-                    await fetchStoreDetails()
-                }
             }
         }
     }
     
-    func fetchStoreDetails() async {
-        do {
-            let session = try await client.auth.session
-            let userId = session.user.id
-            
-            struct StaffProfile: Decodable, Sendable {
-                let store_id: String
-                let full_name: String?
-                let role: String?
-            }
-            
-            let staffList: [StaffProfile] = (try? await client
+    // MARK: - Verificación Estricta de Administrador
+    func verifyAdminAndFetchStoreDetails() async throws {
+        let session = try await client.auth.session
+        let userId = session.user.id
+        let userEmail = session.user.email?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        
+        // 1. Reclamar o verificar invitación vinculada al email autenticado si existe
+        _ = try? await client.rpc("claim_staff_invitation").execute()
+        
+        struct StaffProfile: Decodable, Sendable {
+            let id: String
+            let email: String?
+            let full_name: String?
+            let role: String?
+            let store_id: String?
+        }
+        
+        // 2. Buscar por ID de usuario en staff_profiles
+        let staffListById: [StaffProfile] = (try? await client
+            .from("staff_profiles")
+            .select("id, email, full_name, role, store_id")
+            .eq("id", value: userId.uuidString)
+            .limit(1)
+            .execute()
+            .value) ?? []
+        
+        var staff = staffListById.first
+        
+        // 3. Si no coincide por ID, buscar por email en staff_profiles
+        if staff == nil, let email = userEmail, !email.isEmpty {
+            let staffListByEmail: [StaffProfile] = (try? await client
                 .from("staff_profiles")
-                .select("store_id, full_name, role")
-                .eq("id", value: userId.uuidString)
+                .select("id, email, full_name, role, store_id")
+                .ilike("email", value: email)
                 .limit(1)
                 .execute()
                 .value) ?? []
             
-            let staff = staffList.first
-            let targetStoreId = staff?.store_id ?? Configuration.storeId
-            
-            struct StoreProfile: Decodable, Sendable {
-                let name: String?
-                let logo_url: String?
+            if let matched = staffListByEmail.first {
+                staff = matched
+                // Vincular el ID de autenticación en staff_profiles
+                if matched.id != userId.uuidString {
+                    struct UpdateStaffIdPayload: Encodable, Sendable {
+                        let id: String
+                    }
+                    _ = try? await client
+                        .from("staff_profiles")
+                        .update(UpdateStaffIdPayload(id: userId.uuidString))
+                        .eq("email", value: email)
+                        .execute()
+                }
             }
-            
-            let storeList: [StoreProfile] = (try? await client
-                .from("stores")
-                .select("name, logo_url")
-                .eq("id", value: targetStoreId)
-                .limit(1)
-                .execute()
-                .value) ?? []
-            
-            let store = storeList.first
+        }
+        
+        // 4. VERIFICACIÓN ESTRICTA: Solo personal/administrador registrado en staff_profiles
+        guard let validStaff = staff else {
+            let emailDisplay = userEmail ?? "tu cuenta"
+            let errorMsg = "Acceso denegado: Esta aplicación es exclusiva para administradores registrados. El correo '\(emailDisplay)' no está autorizado."
             
             await MainActor.run {
-                self.staffId = userId.uuidString
-                self.staffName = staff?.full_name
-                self.staffRole = staff?.role
-                self.storeId = targetStoreId
-                self.storeName = store?.name ?? "Productibot Loyalty"
-                self.storeLogoUrl = store?.logo_url
+                self.isAuthenticated = false
+                self.authErrorMessage = errorMsg
+                self.storeId = nil
+                self.storeName = nil
+                self.staffId = nil
+                self.staffName = nil
+                self.staffRole = nil
             }
-        } catch {
-            print("Error fetching store details: \(error)")
+            
+            // Cerrar la sesión no autorizada de inmediato
+            try? await client.auth.signOut()
+            
+            throw NSError(
+                domain: "ProductibotAuth",
+                code: 403,
+                userInfo: [NSLocalizedDescriptionKey: errorMsg]
+            )
+        }
+        
+        // 5. Usuario verificado como Administrador: Cargar tienda asignada
+        let targetStoreId = validStaff.store_id ?? Configuration.storeId
+        
+        struct StoreProfile: Decodable, Sendable {
+            let name: String?
+            let logo_url: String?
+        }
+        
+        let storeList: [StoreProfile] = (try? await client
+            .from("stores")
+            .select("name, logo_url")
+            .eq("id", value: targetStoreId)
+            .limit(1)
+            .execute()
+            .value) ?? []
+        
+        let store = storeList.first
+        
+        await MainActor.run {
+            self.staffId = userId.uuidString
+            self.staffName = validStaff.full_name ?? "Administrador"
+            self.staffRole = validStaff.role ?? "admin"
+            self.storeId = targetStoreId
+            self.storeName = store?.name ?? "Top Scan"
+            self.storeLogoUrl = store?.logo_url
+            self.authErrorMessage = nil
+            self.isAuthenticated = true
         }
     }
     
@@ -129,6 +191,7 @@ class SupabaseManager: ObservableObject {
         try await client.auth.signOut()
         await MainActor.run {
             isAuthenticated = false
+            authErrorMessage = nil
             storeId = nil
             storeLogoUrl = nil
             storeName = nil
@@ -136,6 +199,46 @@ class SupabaseManager: ObservableObject {
             staffName = nil
             staffRole = nil
             lastScanResult = nil
+        }
+    }
+    
+    // MARK: - Autenticación Social (Apple & Google)
+    func signInWithApple(idToken: String, rawNonce: String, fullName: String? = nil) async throws {
+        _ = try await client.auth.signInWithIdToken(
+            credentials: OpenIDConnectCredentials(
+                provider: .apple,
+                idToken: idToken,
+                nonce: rawNonce
+            )
+        )
+        
+        if let fullName = fullName, !fullName.isEmpty {
+            _ = try? await client.auth.update(
+                user: UserAttributes(data: ["full_name": .string(fullName)])
+            )
+        }
+        
+        try await verifyAdminAndFetchStoreDetails()
+    }
+    
+    func signInWithGoogle() async throws {
+        let redirectURL = URL(string: "productibot-scan://login-callback")!
+        _ = try await client.auth.signInWithOAuth(
+            provider: .google,
+            redirectTo: redirectURL
+        )
+        try await verifyAdminAndFetchStoreDetails()
+    }
+    
+    func handleOpenURL(_ url: URL) async {
+        do {
+            try await client.auth.session(from: url)
+            try await verifyAdminAndFetchStoreDetails()
+        } catch {
+            print("Error en callback de autenticación: \(error)")
+            await MainActor.run {
+                self.authErrorMessage = error.localizedDescription
+            }
         }
     }
     

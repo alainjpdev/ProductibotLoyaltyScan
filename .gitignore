@@ -16,3 +16,4 @@ android/.idea/
 *.aab
 *.jks
 *.keystore
+ExportOptions.plist

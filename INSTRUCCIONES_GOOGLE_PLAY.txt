@@ -1,0 +1,46 @@
+=== FICHA DE PUBLICACIÓN EN GOOGLE PLAY CONSOLE ===
+
+1. DATOS DE LA APLICACIÓN:
+Nombre de la aplicación:
+Productibot QR SCAN
+
+Descripción breve (80 caracteres máx):
+Terminal de escaneo para registro de visitas y canje de premios de lealtad.
+
+Descripción completa (4000 caracteres máx):
+Productibot QR SCAN es la aplicación oficial para terminales de personal y puntos de venta del sistema de lealtad Productibot.
+
+Diseñada para operar con máxima rapidez y precisión en entornos de alta demanda, permite al equipo de tienda:
+• Escanear códigos QR de tarjetas de clientes digitales (Apple Wallet, Google Wallet o Web App).
+• Registrar visitas y acumular sellos de lealtad al instante en tiempo real.
+• Notificar inmediatamente cuando un cliente completa su tarjeta y desbloquea una recompensa.
+• Validar y canjear cupones de premios promocionales con verificación de sucursal y prevención de doble canje.
+• Consultar el último movimiento procesado en pantalla para control del cajero.
+• Operar con linterna integrada para condiciones de baja iluminación.
+
+Requisitos:
+Requiere una cuenta de personal autorizada y conexión a Internet.
+
+2. CATEGORÍA:
+Categoría: Empresa (Business) o Productividad (Productivity)
+Etiquetas: Negocios, Punto de venta, Lealtad, Escáner QR
+
+3. CLASIFICACIÓN DE CONTENIDO:
+Cuestionario IARC: Para todo público (PEGI 3 / Everyone)
+¿Contiene anuncios?: No
+¿Contiene compras integradas?: No
+
+4. SEGURIDAD DE LOS DATOS (DATA SAFETY):
+- Información Personal:
+  * Correo electrónico y nombre del personal (solo para autenticación de inicio de sesión).
+  * No se comparte con terceros ni con redes de publicidad.
+- Cámara:
+  * Utilizada exclusivamente en el dispositivo en tiempo real para leer el texto de los códigos QR.
+  * No se graban, almacenan ni transmiten fotos o videos fuera del dispositivo.
+- Cifrado en tránsito: Sí (todas las conexiones van por HTTPS / TLS seguro).
+
+5. ARCHIVOS PARA SUBIR (Ubicados en esta misma carpeta):
+• Paquete firmado: app-release.aab
+• Ícono de la app: icon_512x512.png (512x512 px)
+• Gráfico de funciones: feature_graphic_1024x500.png (1024x500 px)
+• Capturas de pantalla: carpeta "capturas/"
