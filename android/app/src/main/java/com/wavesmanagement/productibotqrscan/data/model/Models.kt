@@ -22,9 +22,11 @@ data class ScanProcessResult(
 
 @Serializable
 data class StaffProfile(
+    val id: String? = null,
     val store_id: String? = null,
     val full_name: String? = null,
-    val role: String? = null
+    val role: String? = null,
+    val email: String? = null
 )
 
 @Serializable

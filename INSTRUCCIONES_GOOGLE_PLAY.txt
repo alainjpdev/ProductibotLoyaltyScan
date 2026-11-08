@@ -2,13 +2,13 @@
 
 1. DATOS DE LA APLICACIÓN:
 Nombre de la aplicación:
-Productibot QR SCAN
+Top Scan
 
 Descripción breve (80 caracteres máx):
 Terminal de escaneo para registro de visitas y canje de premios de lealtad.
 
 Descripción completa (4000 caracteres máx):
-Productibot QR SCAN es la aplicación oficial para terminales de personal y puntos de venta del sistema de lealtad Productibot.
+Top Scan es la aplicación oficial para terminales de personal y puntos de venta del sistema de lealtad Tarjeta Top.
 
 Diseñada para operar con máxima rapidez y precisión en entornos de alta demanda, permite al equipo de tienda:
 • Escanear códigos QR de tarjetas de clientes digitales (Apple Wallet, Google Wallet o Web App).

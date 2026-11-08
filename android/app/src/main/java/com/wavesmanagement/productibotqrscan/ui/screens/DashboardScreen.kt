@@ -85,7 +85,7 @@ fun DashboardScreen(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(
-                        text = storeName ?: "Productibot Scan",
+                        text = storeName ?: "Top Scan",
                         color = Color.White,
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,

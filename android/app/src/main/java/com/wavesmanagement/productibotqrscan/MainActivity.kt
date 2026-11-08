@@ -1,6 +1,7 @@
 package com.wavesmanagement.productibotqrscan
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Toast
@@ -12,14 +13,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.wavesmanagement.productibotqrscan.data.SupabaseManager
 import com.wavesmanagement.productibotqrscan.ui.screens.DashboardScreen
 import com.wavesmanagement.productibotqrscan.ui.screens.LoginScreen
 import com.wavesmanagement.productibotqrscan.ui.screens.ScannerScreen
-import com.wavesmanagement.productibotqrscan.ui.theme.BgDarkBottom
 import com.wavesmanagement.productibotqrscan.ui.theme.ProductibotLoyaltyScanTheme
+import io.github.jan.supabase.auth.handleDeeplinks
 
 class MainActivity : ComponentActivity() {
 
@@ -41,6 +43,13 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        try {
+            val supabase = SupabaseManager.getInstance()
+            supabase.client.handleDeeplinks(intent)
+        } catch (e: Exception) {
+            // Logger o fallback
+        }
 
         setContent {
             ProductibotLoyaltyScanTheme {
@@ -66,7 +75,7 @@ class MainActivity : ComponentActivity() {
 
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = BgDarkBottom
+                    color = Color.Black
                 ) {
                     Crossfade(
                         targetState = isAuthenticated,
@@ -88,6 +97,16 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        try {
+            val supabase = SupabaseManager.getInstance()
+            supabase.client.handleDeeplinks(intent)
+        } catch (e: Exception) {
+            // Fallback
         }
     }
 }

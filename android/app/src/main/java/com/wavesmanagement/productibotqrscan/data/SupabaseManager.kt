@@ -7,6 +7,8 @@ import com.wavesmanagement.productibotqrscan.data.model.*
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.providers.Google
+import io.github.jan.supabase.auth.providers.Apple
 import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.auth.status.SessionStatus
 import io.github.jan.supabase.createSupabaseClient
@@ -31,7 +33,10 @@ class SupabaseManager private constructor(context: Context) {
         supabaseUrl = Configuration.SUPABASE_URL,
         supabaseKey = Configuration.SUPABASE_ANON_KEY
     ) {
-        install(Auth)
+        install(Auth) {
+            scheme = "productibot-scan"
+            host = "login-callback"
+        }
         install(Postgrest)
     }
 
@@ -40,10 +45,13 @@ class SupabaseManager private constructor(context: Context) {
     private val _isAuthenticated = MutableStateFlow(false)
     val isAuthenticated: StateFlow<Boolean> = _isAuthenticated.asStateFlow()
 
+    private val _authErrorMessage = MutableStateFlow<String?>(null)
+    val authErrorMessage: StateFlow<String?> = _authErrorMessage.asStateFlow()
+
     private val _storeId = MutableStateFlow<String?>(null)
     val storeId: StateFlow<String?> = _storeId.asStateFlow()
 
-    private val _storeName = MutableStateFlow<String?>("Productibot Loyalty")
+    private val _storeName = MutableStateFlow<String?>("Top Scan")
     val storeName: StateFlow<String?> = _storeName.asStateFlow()
 
     private val _storeLogoUrl = MutableStateFlow<String?>(null)
@@ -66,8 +74,7 @@ class SupabaseManager private constructor(context: Context) {
             client.auth.sessionStatus.collect { status ->
                 when (status) {
                     is SessionStatus.Authenticated -> {
-                        _isAuthenticated.value = true
-                        fetchStoreDetails()
+                        verifyAdminAndFetchStoreDetails()
                     }
                     is SessionStatus.NotAuthenticated -> {
                         _isAuthenticated.value = false
@@ -89,38 +96,83 @@ class SupabaseManager private constructor(context: Context) {
         _lastScanResult.value = null
     }
 
+    fun setAuthErrorMessage(msg: String?) {
+        _authErrorMessage.value = msg
+    }
+
     suspend fun signIn(email: String, pass: String) {
+        _authErrorMessage.value = null
         client.auth.signInWith(Email) {
             this.email = email.trim()
             this.password = pass
         }
     }
 
+    suspend fun signInWithGoogle() {
+        _authErrorMessage.value = null
+        client.auth.signInWith(Google)
+    }
+
+    suspend fun signInWithApple() {
+        _authErrorMessage.value = null
+        client.auth.signInWith(Apple)
+    }
+
     suspend fun signOut() {
         client.auth.signOut()
+        _isAuthenticated.value = false
+        _authErrorMessage.value = null
         clearState()
     }
 
-    suspend fun fetchStoreDetails() {
+    suspend fun verifyAdminAndFetchStoreDetails() {
         try {
             val session = client.auth.currentSessionOrNull() ?: return
-            val userId = session.user?.id ?: return
+            val user = session.user ?: return
+            val userId = user.id
+            val userEmail = user.email
 
-            val staffList = try {
+            // 1. Buscar en staff_profiles por ID
+            var staffList = try {
                 client.postgrest["staff_profiles"]
-                    .select(Columns.list("store_id", "full_name", "role")) {
+                    .select(Columns.list("id", "store_id", "full_name", "role", "email")) {
                         filter {
                             eq("id", userId)
                         }
                         limit(1)
                     }.decodeList<StaffProfile>()
             } catch (e: Exception) {
-                Log.e("SupabaseManager", "Error querying staff_profiles: ${e.message}")
+                Log.e("SupabaseManager", "Error querying staff_profiles by id: ${e.message}")
                 emptyList()
             }
 
-            val staff = staffList.firstOrNull()
-            val targetStoreId = staff?.store_id ?: Configuration.DEFAULT_STORE_ID
+            // 2. Si no por ID, buscar por email
+            if (staffList.isEmpty() && !userEmail.isNullOrBlank()) {
+                staffList = try {
+                    client.postgrest["staff_profiles"]
+                        .select(Columns.list("id", "store_id", "full_name", "role", "email")) {
+                            filter {
+                                eq("email", userEmail)
+                            }
+                            limit(1)
+                        }.decodeList<StaffProfile>()
+                } catch (e: Exception) {
+                    Log.e("SupabaseManager", "Error querying staff_profiles by email: ${e.message}")
+                    emptyList()
+                }
+            }
+
+            val validStaff = staffList.firstOrNull()
+            if (validStaff == null) {
+                Log.w("SupabaseManager", "Acceso denegado: Usuario $userId ($userEmail) no es personal autorizado.")
+                client.auth.signOut()
+                _isAuthenticated.value = false
+                _authErrorMessage.value = "Acceso denegado: Esta aplicación es exclusiva para administradores y personal de tienda registrados."
+                clearState()
+                return
+            }
+
+            val targetStoreId = validStaff.store_id ?: Configuration.DEFAULT_STORE_ID
 
             val storeList = try {
                 client.postgrest["stores"]
@@ -138,13 +190,15 @@ class SupabaseManager private constructor(context: Context) {
             val store = storeList.firstOrNull()
 
             _staffId.value = userId
-            _staffName.value = staff?.full_name
-            _staffRole.value = staff?.role
+            _staffName.value = validStaff.full_name ?: "Administrador"
+            _staffRole.value = validStaff.role ?: "admin"
             _storeId.value = targetStoreId
-            _storeName.value = store?.name ?: "Productibot Loyalty"
+            _storeName.value = store?.name ?: "Top Scan"
             _storeLogoUrl.value = store?.logo_url
+            _authErrorMessage.value = null
+            _isAuthenticated.value = true
         } catch (e: Exception) {
-            Log.e("SupabaseManager", "Error fetching store details", e)
+            Log.e("SupabaseManager", "Error in verifyAdminAndFetchStoreDetails", e)
         }
     }
 
