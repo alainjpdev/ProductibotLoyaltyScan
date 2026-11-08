@@ -10,7 +10,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.wavesmanagement.productibotqrscan"
+        applicationId = "com.productibot.loyaltyscan"
         minSdk = 26
         targetSdk = 36
         versionCode = 4
