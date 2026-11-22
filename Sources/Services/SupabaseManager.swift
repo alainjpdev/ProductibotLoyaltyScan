@@ -263,11 +263,12 @@ class SupabaseManager: ObservableObject {
                 let store_id: String?
                 let reward_description: String
                 let status: String
+                let expires_at: String?
             }
             
             let coupons: [CouponRecord] = try await client
                 .from("coupons")
-                .select("id, profile_id, store_id, reward_description, status")
+                .select("id, profile_id, store_id, reward_description, status, expires_at")
                 .eq("id", value: uuid)
                 .limit(1)
                 .execute()
@@ -288,6 +289,36 @@ class SupabaseManager: ObservableObject {
                         title: "Cupón Ya Canjeado",
                         subtitle: "Este cupón de premio ya fue canjeado con anterioridad."
                     )
+                }
+
+                if coupon.status.lowercased() == "expired" {
+                    return ScanProcessResult(
+                        type: .error,
+                        title: "Cupón Expirado",
+                        subtitle: "Este cupón ha sido marcado como expirado y no es válido para canje."
+                    )
+                }
+
+                if let expStr = coupon.expires_at, !expStr.isEmpty {
+                    let iso = ISO8601DateFormatter()
+                    iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+                    let expDate = iso.date(from: expStr) ?? {
+                        let df = DateFormatter()
+                        df.dateFormat = "yyyy-MM-dd"
+                        return df.date(from: expStr)
+                    }()
+
+                    if let expDate = expDate, Date() > expDate {
+                        let dfDisplay = DateFormatter()
+                        dfDisplay.dateFormat = "d 'de' MMMM"
+                        dfDisplay.locale = Locale(identifier: "es_MX")
+                        let dateText = dfDisplay.string(from: expDate)
+                        return ScanProcessResult(
+                            type: .error,
+                            title: "Cupón Vencido",
+                            subtitle: "Este cupón expiró el \(dateText) y no puede ser canjeado."
+                        )
+                    }
                 }
                 
                 // Canjear cupón en base de datos

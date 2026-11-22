@@ -41,7 +41,8 @@ data class CouponRecord(
     val profile_id: String,
     val store_id: String? = null,
     val reward_description: String,
-    val status: String
+    val status: String,
+    val expires_at: String? = null
 )
 
 @Serializable

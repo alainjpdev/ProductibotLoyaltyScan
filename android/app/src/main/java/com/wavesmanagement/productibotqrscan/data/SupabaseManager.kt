@@ -215,7 +215,7 @@ class SupabaseManager private constructor(context: Context) {
         // 1. Verificar si es un Cupón de Premio (coupons)
         try {
             val coupons = client.postgrest["coupons"]
-                .select(Columns.list("id", "profile_id", "store_id", "reward_description", "status")) {
+                .select(Columns.list("id", "profile_id", "store_id", "reward_description", "status", "expires_at")) {
                     filter {
                         eq("id", uuid)
                     }
@@ -239,6 +239,35 @@ class SupabaseManager private constructor(context: Context) {
                         title = "Cupón Ya Canjeado",
                         subtitle = "Este cupón de premio ya fue canjeado con anterioridad."
                     )
+                }
+
+                if (coupon.status.equals("expired", ignoreCase = true)) {
+                    return ScanProcessResult(
+                        type = ScanResultType.ERROR,
+                        title = "Cupón Expirado",
+                        subtitle = "Este cupón ha sido marcado como expirado y no es válido para canje."
+                    )
+                }
+
+                if (!coupon.expires_at.isNullOrBlank()) {
+                    val expDate = try {
+                        val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
+                        sdf.timeZone = TimeZone.getTimeZone("UTC")
+                        sdf.parse(coupon.expires_at)
+                    } catch (e: Exception) {
+                        try {
+                            SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(coupon.expires_at)
+                        } catch (e: Exception) { null }
+                    }
+
+                    if (expDate != null && Date().after(expDate)) {
+                        val displayFormat = SimpleDateFormat("d 'de' MMMM", Locale("es", "MX"))
+                        return ScanProcessResult(
+                            type = ScanResultType.ERROR,
+                            title = "Cupón Vencido",
+                            subtitle = "Este cupón expiró el ${displayFormat.format(expDate)} y no puede ser canjeado."
+                        )
+                    }
                 }
 
                 // Canjear cupón
