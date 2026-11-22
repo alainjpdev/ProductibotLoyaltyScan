@@ -22,8 +22,8 @@ targets:
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
         CFBundleDisplayName: "Top Scan"
-        CFBundleShortVersionString: "1.0.3"
-        CFBundleVersion: "4"
+        CFBundleShortVersionString: "1.0.4"
+        CFBundleVersion: "19"
         NSCameraUsageDescription: "Necesitamos acceso a la cámara para escanear el código QR de los clientes."
         NSHumanReadableCopyright: "© 2026 Alain Jean Paul Raimond Kedilhac Ruiz"
         CFBundleURLTypes:
