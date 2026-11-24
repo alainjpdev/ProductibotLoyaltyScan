@@ -111,7 +111,7 @@ class SupabaseManager: ObservableObject {
             let staffListByEmail: [StaffProfile] = (try? await client
                 .from("staff_profiles")
                 .select("id, email, full_name, role, store_id")
-                .ilike("email", value: email)
+                .ilike("email", pattern: email)
                 .limit(1)
                 .execute()
                 .value) ?? []
